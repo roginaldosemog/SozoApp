@@ -7,8 +7,14 @@ import {
   Text,
   TouchableOpacity,
   View,
+
+  ActivityIndicator,
+  AsyncStorage,
+  Button,
+  StatusBar,
 } from 'react-native';
 import { WebBrowser } from 'expo';
+import * as firebase from 'firebase';
 
 import { MonoText } from '../components/StyledText';
 
@@ -44,6 +50,8 @@ export default class HomeScreen extends React.Component {
             <Text style={styles.getStartedText}>
               Change this text and your app will automatically reload.
             </Text>
+
+            <Button title="Sign me out :)" onPress={this._signOutAsync} />
           </View>
 
           <View style={styles.helpContainer}>
@@ -63,6 +71,16 @@ export default class HomeScreen extends React.Component {
       </View>
     );
   }
+
+  _signOutAsync = async () => {
+    await firebase.auth().signOut()
+    .then(() => {
+      console.log("SignOut Sucessful!");
+      this.props.navigation.navigate('Auth');
+    }, (error) => {
+      Alert.alert(error.message);
+    });
+  };
 
   _maybeRenderDevelopmentModeWarning() {
     if (__DEV__) {
