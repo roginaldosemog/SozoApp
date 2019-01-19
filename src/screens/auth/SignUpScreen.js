@@ -27,7 +27,7 @@ export default class SignUpScreen extends React.Component {
           onChangeText={(text) => { this.setState({name: text}) }}
           placeholder="Name"
           autoCorrect={false}
-          />
+        />
 
         <View style={{paddingTop:10}} />
 
@@ -38,7 +38,7 @@ export default class SignUpScreen extends React.Component {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
-          />
+        />
 
         <View style={{paddingTop:10}} />
 
@@ -49,7 +49,7 @@ export default class SignUpScreen extends React.Component {
           secureTextEntry={true}
           autoCapitalize="none"
           autoCorrect={false}
-          />
+        />
 
         <View style={{paddingTop:10}} />
 
@@ -60,7 +60,7 @@ export default class SignUpScreen extends React.Component {
           secureTextEntry={true}
           autoCapitalize="none"
           autoCorrect={false}
-          />
+        />
 
         <Button title="Signup" onPress={this._signUpAsync} />
 
