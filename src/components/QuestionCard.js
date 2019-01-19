@@ -22,35 +22,71 @@ import {
 } from 'react-native-paper';
 import { WebBrowser } from 'expo';
 import * as firebase from 'firebase';
+import moment from 'moment';
 
 export default class QuestionCard extends React.Component {
-  state = {
-    questionMode: 0,
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      questionMode: null,
+      daysFromLastAnswer: null,
+      lastAnswerCorrect: true,
+      answeredToday: null,
+    }
   }
 
-  // componentDidMount() {
-  //   // this._loadQuestionMode();
-  //   // this._updateQuestionCard();
-  // }
+  componentWillMount() {
+    this._loadQuestionMode();
+  }
 
   render() {
     return (
       <Card style={styles.card}>
-        {this._updateQuestionCard()}
+        {this._loadQuestionCard()}
       </Card>
     );
   }
 
   _onCardButtonPress = (mode) => {
-    console.log('Pressed Challenge Card Button');
+    console.log('Pressed Daily Question Card Button');
     this._setQuestionMode(mode);
   }
 
-  _loadQuestionMode = () => {
-    //
+  _loadQuestionMode = async () => {
+    var today = moment();
+    var lastAnswer = moment([2019, 0, 19]); // Get date from firebase
+    var daysFromLastAnswer = today.diff(lastAnswer, 'days');
+
+    var answeredToday = daysFromLastAnswer == 0 ? true : false;
+    await this.setState({answeredToday: answeredToday});
+
+    // Get if last answer was correct or not (firebase)
+
+    this._updateQuestionStatus();
   }
 
-  _updateQuestionCard = () => {
+  _updateQuestionStatus = async () => {
+    const answeredToday = this.state.answeredToday;
+    const lastAnswerCorrect = this.state.lastAnswerCorrect;
+    var mode;
+
+    console.log(answeredToday);
+
+    if (answeredToday){
+      if (lastAnswerCorrect)
+      mode = 1;
+      else
+      mode = 2;
+    } else {
+      mode = 0;
+      // Load Daily Question
+    }
+
+    await this._setQuestionMode(mode);
+  }
+
+  _loadQuestionCard = () => {
     // 0 = Not answered
     // 1 = Correct answer
     // 2 = Wrong answer
@@ -140,7 +176,7 @@ export default class QuestionCard extends React.Component {
       break;
       default:
       // Something is wrong
-      console.log("Error loading question mode");
+      // console.log("Error loading question mode"); // Fix
       break;
     }
   }
