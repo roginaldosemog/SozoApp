@@ -30,9 +30,10 @@ export default class QuestionCard extends React.Component {
 
     this.state = {
       questionMode: null,
-      daysFromLastAnswer: null,
-      lastAnswerCorrect: true,
+      wasLastAnswerCorrect: null,
       answeredToday: null,
+
+      score: null,
     }
   }
 
@@ -54,8 +55,14 @@ export default class QuestionCard extends React.Component {
   }
 
   _loadQuestionMode = async () => {
+    this._getUserData();
+
+    //const answeredToday = this.state.answeredToday;
+    const wasLastAnswerCorrect = this.state.wasLastAnswerCorrect;
+
+
     var today = moment();
-    var lastAnswer = moment([2019, 0, 19]); // Get date from firebase
+    var lastAnswer = moment([2019, 0, 20]); // Get date from firebase
     var daysFromLastAnswer = today.diff(lastAnswer, 'days');
 
     var answeredToday = daysFromLastAnswer == 0 ? true : false;
@@ -63,18 +70,11 @@ export default class QuestionCard extends React.Component {
 
     // Get if last answer was correct or not (firebase)
 
-    this._updateQuestionStatus();
-  }
 
-  _updateQuestionStatus = async () => {
-    const answeredToday = this.state.answeredToday;
-    const lastAnswerCorrect = this.state.lastAnswerCorrect;
     var mode;
 
-    console.log(answeredToday);
-
     if (answeredToday){
-      if (lastAnswerCorrect)
+      if (wasLastAnswerCorrect)
       mode = 1;
       else
       mode = 2;
@@ -84,6 +84,26 @@ export default class QuestionCard extends React.Component {
     }
 
     await this._setQuestionMode(mode);
+  }
+
+  _getUserData = () => {
+    var userId = firebase.auth().currentUser.uid;
+    firebase.database().ref('users/' + userId).on('value', (snapshot) => {
+      if (snapshot.val().lastAnswerDate != null){
+        const lastAnswerDate = snapshot.val().lastAnswerDate;
+        console.log("lastAnswerDate: " + lastAnswerDate.year);
+      }
+      if (snapshot.val().wasLastAnswerCorrect != null){
+        const wasLastAnswerCorrect = snapshot.val().wasLastAnswerCorrect;
+        console.log("wasLastAnswerCorrect: " + wasLastAnswerCorrect);
+      }
+    });
+    // .then((snapshot) => {
+    //   console.log(snapshot);
+    //   return snapshot;
+    // }, (error) => {
+    //   console.log(error.message);
+    // });
   }
 
   _loadQuestionCard = () => {
