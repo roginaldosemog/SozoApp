@@ -10,140 +10,99 @@ export default class QuestionCard extends React.Component {
     questionMode: null,
     answeredToday: null,
     lastAnswerWasCorrect: null,
-
-    teste: null,
+    score: null,
   }
 
   componentWillMount() {
     var userId = firebase.auth().currentUser.uid;
-    this.fetchTeste(userId);
+    this.fetchUserData(userId);
   }
 
-  storeTeste(userId, value) {
+  storeUserData(userId) {
     firebase.database().ref('users/' + userId).set({
-      teste: value,
+      lastAnswerDate: [2019, 0, 20], //trocar por 'ontem'
+      lastAnswerWasCorrect: false,
+      score: 0,
     })
     .then(() => {console.log('Success at storeTeste')})
     .catch((error) => {console.log(error)})
   }
 
-  fetchTeste(userId) {
+  fetchUserData(userId) {
     firebase.database().ref('users/' + userId).on('value', (snapshot) => {
       // If user data does not exist, it'll be created
       if (!snapshot.val()) {
-        this.storeTeste(userId, 100)
+        this.storeUserData(userId)
       }
       else {
-        const teste = snapshot.val().teste;
-        console.log("teste: " + teste);
-        this.setTesteState(teste);
+        const lastAnswerDate = snapshot.val().lastAnswerDate;
+        this.setAnsweredTodayFromDate(lastAnswerDate);
+
+        const lastAnswerWasCorrect = snapshot.val().lastAnswerWasCorrect;
+        this.setLastAnswerWasCorrect(lastAnswerWasCorrect);
+
+        const score = snapshot.val().score;
+        this.setScore(score);
+
+        this.updateQuestionMode();
       }
     });
   }
 
-  setTesteState = value => {
+  updateQuestionMode = () => {
+    const answeredToday = this.state.answeredToday;
+    const lastAnswerWasCorrect = this.state.lastAnswerWasCorrect;
+
+    if (answeredToday){
+      if (lastAnswerWasCorrect)
+      this.setQuestionMode(1);
+      else
+      this.setQuestionMode(2);
+    } else {
+      this.setQuestionMode(0);
+    }
+  }
+
+  setAnsweredTodayFromDate = lastAnswerDate => {
+    var today = moment();
+    var lastAnswer = moment(lastAnswerDate);
+    var daysFromLastAnswer = today.diff(lastAnswer, 'days');
+    console.log("f: daysFromLastAnswer: " + daysFromLastAnswer);
+
+    var answeredToday = daysFromLastAnswer == 0 ? true : false;
+    console.log("f: answeredToday: " + answeredToday);
+
     this.setState((prevState) => {
-      return {teste: value}
+      return {answeredToday: answeredToday}
+    })
+  }
+
+  setLastAnswerWasCorrect = lastAnswerWasCorrect => {
+    this.setState((prevState) => {
+      return {lastAnswerWasCorrect: lastAnswerWasCorrect}
+    })
+  }
+
+  setScore = score => {
+    this.setState((prevState) => {
+      return {score: score}
+    })
+  }
+
+  setQuestionMode = questionMode => {
+    this.setState((prevState) => {
+      return {questionMode: questionMode}
     })
   }
 
   render() {
-    console.log("render is here! And test value is: " + this.state.teste);
+    console.log("render is here! And mode value is: " + this.state.questionMode);
     return (
       <Card style={styles.card}>
-        {/*this.loadQuestionCard()*/}
-        <Text> {this.state.teste} </Text>
+        {this.loadQuestionCard()}
       </Card>
     );
   }
-
-  // _loadQuestionMode() {
-  //   this._getUserData(); //await?
-  //
-  //   const answeredToday = this.state.answeredToday;
-  //   const lastAnswerWasCorrect = this.state.lastAnswerWasCorrect;
-  //   var mode;
-  //
-  //   if (answeredToday){
-  //     if (lastAnswerWasCorrect)
-  //     mode = 1;
-  //     else
-  //     mode = 2;
-  //   } else {
-  //     mode = 0;
-  //     // Load Daily Question
-  //   }
-  //   this._setQuestionMode(mode); //await?
-  // }
-
-  // _getUserData() {
-  //   var dateX, lastX, scoreX;
-  //
-  //
-  //   var userId = firebase.auth().currentUser.uid;
-  //   firebase.database().ref('users/' + userId).on('value', (snapshot) => {});
-
-
-  // console.log(!snapshot);
-  // console.log(!!snapshot);
-  // console.log(snapshot === null);
-  // console.log(snapshot);
-  //
-  //
-  // if (!!snapshot) {
-  //   console.log(snapshot.val().lastAnswerDate);
-  //   console.log(snapshot.val().lastAnswerWasCorrect);
-  //
-  //   if (!!snapshot.val().lastAnswerDate && !!snapshot.val().lastAnswerWasCorrect) {
-  //     const lastAnswerDate = snapshot.val().lastAnswerDate;
-  //     const lastAnswerWasCorrect = snapshot.val().lastAnswerWasCorrect;
-  //
-  //     console.log(lastAnswerDate);
-  //     console.log("lastAnswerWasCorrect: " + lastAnswerWasCorrect);
-  //
-  //     this._setAnsweredToday(lastAnswerDate);
-  //     this.setState({lastAnswerWasCorrect: lastAnswerWasCorrect})
-  //   }
-  // } else {
-  //   console.log("No user data");
-  //   this._createUserData();
-  // }
-
-  // .then((snapshot) => {
-  //   console.log(snapshot);
-  //   return snapshot;
-  // }, (error) => {
-  //   console.log(error.message);
-  // });
-  // }
-
-  // _setAnsweredToday(lastAnswerDate) {
-  //   var today = moment();
-  //   // var today = moment([2019, 0, 20]);
-  //   var lastAnswer = moment(lastAnswerDate);
-  //   var daysFromLastAnswer = today.diff(lastAnswer, 'days');
-  //   console.log(daysFromLastAnswer);
-  //
-  //   var answeredToday = daysFromLastAnswer == 0 ? true : false;
-  //   console.log(answeredToday);
-  // }
-  //
-  // _createUserData() {
-  //   var userId = firebase.auth().currentUser.uid;
-  //   firebase.database().ref('users/' + userId).set({
-  //     lastAnswerDate: [2019, 0, 20],
-  //     lastAnswerWasCorrect: false,
-  //     score: 0,
-  //   })
-  //   .then((data) => {
-  //     console.log('success at creation of user data', data)
-  //   })
-  //   .catch((error) => {
-  //     console.log('error at creation of user data', error)
-  //   })
-  // }
-
-  ///////// ALL RIGHT /////////
 
   loadQuestionCard() {
     // 0 = Not answered
@@ -244,15 +203,6 @@ export default class QuestionCard extends React.Component {
   onCardButtonPress = mode => {
     //console.log('Pressed Daily Question Card Button');
     this.setQuestionMode(mode);
-  }
-
-  // answeredToday: null,
-  // lastAnswerWasCorrect: null,
-
-  setQuestionMode = mode => {
-    this.setState((prevState) => {
-      return {questionMode: mode}
-    })
   }
 }
 
