@@ -1,112 +1,151 @@
 import React from 'react';
-import {
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+import { StyleSheet, Text, View } from 'react-native';
+import { Card, Button } from 'react-native-paper';
 
-  ActivityIndicator,
-  AsyncStorage,
-  //Button,
-  StatusBar,
-} from 'react-native';
-import {
-  Title,
-  Caption,
-  Paragraph,
-  Card,
-  Button
-} from 'react-native-paper';
-import { WebBrowser } from 'expo';
 import * as firebase from 'firebase';
 import moment from 'moment';
 
 export default class QuestionCard extends React.Component {
-  constructor(props) {
-    super(props);
+  state = {
+    questionMode: null,
+    answeredToday: null,
+    lastAnswerWasCorrect: null,
 
-    this.state = {
-      questionMode: null,
-      wasLastAnswerCorrect: null,
-      answeredToday: null,
-
-      score: null,
-    }
+    teste: null,
   }
 
   componentWillMount() {
-    this._loadQuestionMode();
+    var userId = firebase.auth().currentUser.uid;
+    this.fetchTeste(userId);
+  }
+
+  storeTeste(userId, value) {
+    firebase.database().ref('users/' + userId).set({
+      teste: value,
+    })
+    .then(() => {console.log('Success at storeTeste')})
+    .catch((error) => {console.log(error)})
+  }
+
+  fetchTeste(userId) {
+    firebase.database().ref('users/' + userId).on('value', (snapshot) => {
+      // If user data does not exist, it'll be created
+      if (!snapshot.val()) {
+        this.storeTeste(userId, 100)
+      }
+      else {
+        const teste = snapshot.val().teste;
+        console.log("teste: " + teste);
+        this.setTesteState(teste);
+      }
+    });
+  }
+
+  setTesteState = value => {
+    this.setState((prevState) => {
+      return {teste: value}
+    })
   }
 
   render() {
+    console.log("render is here! And test value is: " + this.state.teste);
     return (
       <Card style={styles.card}>
-        {this._loadQuestionCard()}
+        {/*this.loadQuestionCard()*/}
+        <Text> {this.state.teste} </Text>
       </Card>
     );
   }
 
-  _onCardButtonPress = (mode) => {
-    console.log('Pressed Daily Question Card Button');
-    this._setQuestionMode(mode);
-  }
+  // _loadQuestionMode() {
+  //   this._getUserData(); //await?
+  //
+  //   const answeredToday = this.state.answeredToday;
+  //   const lastAnswerWasCorrect = this.state.lastAnswerWasCorrect;
+  //   var mode;
+  //
+  //   if (answeredToday){
+  //     if (lastAnswerWasCorrect)
+  //     mode = 1;
+  //     else
+  //     mode = 2;
+  //   } else {
+  //     mode = 0;
+  //     // Load Daily Question
+  //   }
+  //   this._setQuestionMode(mode); //await?
+  // }
 
-  _loadQuestionMode = async () => {
-    this._getUserData();
-
-    //const answeredToday = this.state.answeredToday;
-    const wasLastAnswerCorrect = this.state.wasLastAnswerCorrect;
-
-
-    var today = moment();
-    var lastAnswer = moment([2019, 0, 20]); // Get date from firebase
-    var daysFromLastAnswer = today.diff(lastAnswer, 'days');
-
-    var answeredToday = daysFromLastAnswer == 0 ? true : false;
-    await this.setState({answeredToday: answeredToday});
-
-    // Get if last answer was correct or not (firebase)
+  // _getUserData() {
+  //   var dateX, lastX, scoreX;
+  //
+  //
+  //   var userId = firebase.auth().currentUser.uid;
+  //   firebase.database().ref('users/' + userId).on('value', (snapshot) => {});
 
 
-    var mode;
+  // console.log(!snapshot);
+  // console.log(!!snapshot);
+  // console.log(snapshot === null);
+  // console.log(snapshot);
+  //
+  //
+  // if (!!snapshot) {
+  //   console.log(snapshot.val().lastAnswerDate);
+  //   console.log(snapshot.val().lastAnswerWasCorrect);
+  //
+  //   if (!!snapshot.val().lastAnswerDate && !!snapshot.val().lastAnswerWasCorrect) {
+  //     const lastAnswerDate = snapshot.val().lastAnswerDate;
+  //     const lastAnswerWasCorrect = snapshot.val().lastAnswerWasCorrect;
+  //
+  //     console.log(lastAnswerDate);
+  //     console.log("lastAnswerWasCorrect: " + lastAnswerWasCorrect);
+  //
+  //     this._setAnsweredToday(lastAnswerDate);
+  //     this.setState({lastAnswerWasCorrect: lastAnswerWasCorrect})
+  //   }
+  // } else {
+  //   console.log("No user data");
+  //   this._createUserData();
+  // }
 
-    if (answeredToday){
-      if (wasLastAnswerCorrect)
-      mode = 1;
-      else
-      mode = 2;
-    } else {
-      mode = 0;
-      // Load Daily Question
-    }
+  // .then((snapshot) => {
+  //   console.log(snapshot);
+  //   return snapshot;
+  // }, (error) => {
+  //   console.log(error.message);
+  // });
+  // }
 
-    await this._setQuestionMode(mode);
-  }
+  // _setAnsweredToday(lastAnswerDate) {
+  //   var today = moment();
+  //   // var today = moment([2019, 0, 20]);
+  //   var lastAnswer = moment(lastAnswerDate);
+  //   var daysFromLastAnswer = today.diff(lastAnswer, 'days');
+  //   console.log(daysFromLastAnswer);
+  //
+  //   var answeredToday = daysFromLastAnswer == 0 ? true : false;
+  //   console.log(answeredToday);
+  // }
+  //
+  // _createUserData() {
+  //   var userId = firebase.auth().currentUser.uid;
+  //   firebase.database().ref('users/' + userId).set({
+  //     lastAnswerDate: [2019, 0, 20],
+  //     lastAnswerWasCorrect: false,
+  //     score: 0,
+  //   })
+  //   .then((data) => {
+  //     console.log('success at creation of user data', data)
+  //   })
+  //   .catch((error) => {
+  //     console.log('error at creation of user data', error)
+  //   })
+  // }
 
-  _getUserData = () => {
-    var userId = firebase.auth().currentUser.uid;
-    firebase.database().ref('users/' + userId).on('value', (snapshot) => {
-      if (snapshot.val().lastAnswerDate != null){
-        const lastAnswerDate = snapshot.val().lastAnswerDate;
-        console.log("lastAnswerDate: " + lastAnswerDate.year);
-      }
-      if (snapshot.val().wasLastAnswerCorrect != null){
-        const wasLastAnswerCorrect = snapshot.val().wasLastAnswerCorrect;
-        console.log("wasLastAnswerCorrect: " + wasLastAnswerCorrect);
-      }
-    });
-    // .then((snapshot) => {
-    //   console.log(snapshot);
-    //   return snapshot;
-    // }, (error) => {
-    //   console.log(error.message);
-    // });
-  }
+  ///////// ALL RIGHT /////////
 
-  _loadQuestionCard = () => {
+  loadQuestionCard() {
     // 0 = Not answered
     // 1 = Correct answer
     // 2 = Wrong answer
@@ -126,7 +165,7 @@ export default class QuestionCard extends React.Component {
             style={styles.cardButton}
             mode="contained"
             color="#004488"
-            onPress={() => this._onCardButtonPress(3)}>
+            onPress={() => this.onCardButtonPress(3)}>
             RESPONDER!
           </Button>
         </Card.Content>
@@ -144,7 +183,7 @@ export default class QuestionCard extends React.Component {
           <Button style={styles.cardButton}
             mode="contained"
             color="#004488"
-            onPress={() => this._onCardButtonPress(0)}>
+            onPress={() => this.onCardButtonPress(0)}>
             RESETAR!
           </Button>
         </Card.Content>
@@ -162,7 +201,7 @@ export default class QuestionCard extends React.Component {
           <Button style={styles.cardButton}
             mode="contained"
             color="#004488"
-            onPress={() => this._onCardButtonPress(0)}>
+            onPress={() => this.onCardButtonPress(0)}>
             RESETAR!
           </Button>
         </Card.Content>
@@ -181,13 +220,13 @@ export default class QuestionCard extends React.Component {
             <Button style={styles.cardButton}
               mode="contained"
               color="#004488"
-              onPress={() => this._onCardButtonPress(1)}>
+              onPress={() => this.onCardButtonPress(1)}>
               RESPOSTA CERTA
             </Button>
             <Button style={styles.cardButton}
               mode="contained"
               color="#004488"
-              onPress={() => this._onCardButtonPress(2)}>
+              onPress={() => this.onCardButtonPress(2)}>
               RESPOSTA ERRADA
             </Button>
           </View>
@@ -196,15 +235,25 @@ export default class QuestionCard extends React.Component {
       break;
       default:
       // Something is wrong
+      // Loading
       // console.log("Error loading question mode"); // Fix
       break;
     }
   }
 
-  _setQuestionMode = mode => {
-    this.setState({questionMode: mode});
+  onCardButtonPress = mode => {
+    //console.log('Pressed Daily Question Card Button');
+    this.setQuestionMode(mode);
   }
 
+  // answeredToday: null,
+  // lastAnswerWasCorrect: null,
+
+  setQuestionMode = mode => {
+    this.setState((prevState) => {
+      return {questionMode: mode}
+    })
+  }
 }
 
 const styles = StyleSheet.create({

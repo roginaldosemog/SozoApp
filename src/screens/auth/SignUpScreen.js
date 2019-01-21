@@ -83,7 +83,6 @@ export default class SignUpScreen extends React.Component {
         // photoURL: ?
       }).then(() => {
         console.log("SignUp Successful!");
-        this._createUserData();
         this.props.navigation.navigate('Main');
       }, (error) => {
         console.log(error.message);
@@ -92,29 +91,6 @@ export default class SignUpScreen extends React.Component {
       Alert.alert(error.message);
     });
   };
-
-  _createUserData = () => {
-    var userId = firebase.auth().currentUser.uid;
-    firebase.database().ref('users/' + userId).set({
-      // lastAnswerDate: {
-      //   year: null,
-      //   month: null,
-      //   date: null
-      // },
-      // wasLastAnswerCorrect: null,
-      lastAnswerDate: {
-        year: 2019,
-        month: 0,
-        date: 20
-      },
-      wasLastAnswerCorrect: true,
-      score: 0,
-    }).then((data) => {
-      console.log('data', data) // success
-    }).catch((error) => {
-      console.log('error', error) // error
-    })
-  }
 
   _backToSignIn = () => {
     this.props.navigation.goBack();
