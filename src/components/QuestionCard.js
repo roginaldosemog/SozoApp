@@ -14,7 +14,7 @@ export default class QuestionCard extends React.Component {
       questionMode: null,
       answeredToday: null,
       lastAnswerWasCorrect: null,
-      score: null,
+      score: null
     }
 
     this.userId = firebase.auth().currentUser.uid;
@@ -22,6 +22,7 @@ export default class QuestionCard extends React.Component {
 
   componentDidMount() {
     this.fetchUserData();
+    // this.storeQuestionData();
   }
 
   fetchUserData = async () => {
@@ -105,6 +106,38 @@ export default class QuestionCard extends React.Component {
     this.setState((prevState) => {
       return {questionMode: questionMode}
     })
+  }
+
+  getDailyAnswersCount = async (date) => {
+    var answersCount;
+    await firebase.database().ref('questions/' + date).once('value', (snapshot) => {
+      answersCount = snapshot.numChildren();
+      //return snapshot.numChildren();
+    });
+    return answersCount;
+  }
+
+  // TODO: Uma das abas vai ter de ser para cadastrar as questões
+  storeQuestionData = async () => {
+    // receive questionData
+    var questionData = {
+      date: '20190123',
+      data: {
+        chapter: 'Mateus 2',
+        statement: 'De que lugar uns magos vieram à procura de Jesus?',
+        optionA: 'Das terras do Sul',
+        optionB: 'Das terras do Norte',
+        optionC: 'Das terras do Oriente',
+        optionD: 'Das terras do Ocidente',
+        correctOption: 3,
+      }
+    }
+
+    var questionId = await this.getDailyAnswersCount(questionData.date);
+    await firebase.database().ref('questions/' + questionData.date).child(questionId)
+    .set(questionData.data)
+    .then(() => {console.log('Success at storeQuestionData')})
+    .catch((error) => {console.log(error)})
   }
 
   loadQuestionCard() {
@@ -210,7 +243,7 @@ export default class QuestionCard extends React.Component {
       break;
       default:
       // Loading...
-      console.log("questionMode is null!");
+      // console.log("questionMode is null!");
       break;
     }
   }
