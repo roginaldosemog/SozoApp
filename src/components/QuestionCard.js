@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Card, Button } from 'react-native-paper';
+import CountDown from 'react-native-countdown-component';
 
 import * as firebase from 'firebase';
 import moment from 'moment';
@@ -44,7 +45,6 @@ export default class QuestionCard extends React.Component {
     const yesterdayDate = [
       yesterday.get('year'), yesterday.get('month'), yesterday.get('date')
     ];
-    console.log(yesterdayDate)
 
     await firebase.database().ref('users/' + this.userId).set({
       lastAnswerDate: yesterdayDate,
@@ -60,7 +60,6 @@ export default class QuestionCard extends React.Component {
     const todayDate = [
       today.get('year'), today.get('month'), today.get('date')
     ];
-    console.log(todayDate)
     const pointsToAdd = 50;
     const newScore = answeredCorrect ? this.state.score + pointsToAdd : this.state.score;
 
@@ -173,12 +172,25 @@ export default class QuestionCard extends React.Component {
       case 3:
       return (
         <Card.Content style={styles.cardContent}>
-          <Text style={styles.cardTitle}>
-            PERGUNTA DO DIA
-          </Text>
-          <Text style={styles.cardParagraph}>
-            Respondendo.
-          </Text>
+          <View>
+            <Text style={styles.cardTitle}>
+              PERGUNTA DO DIA
+            </Text>
+            <CountDown
+              until={10}
+              size={15}
+              onFinish={() => this.onCardButtonPress(2)}
+              digitStyle={{backgroundColor: '#1CC625'}}
+              digitTxtStyle={{color: '#FFF'}}
+              timeToShow={['S']}
+              timeLabels={{s: ''}}
+            />
+          </View>
+          <View>
+            <Text style={styles.cardParagraph}>
+              Respondendo.
+            </Text>
+          </View>
           <View>
             <Button style={styles.cardButton}
               mode="contained"
@@ -197,9 +209,8 @@ export default class QuestionCard extends React.Component {
       );
       break;
       default:
-      // Something is wrong
-      // Loading
-      // console.log("Error loading question mode"); // Fix
+      // Loading...
+      console.log("questionMode is null!");
       break;
     }
   }
@@ -234,7 +245,6 @@ export default class QuestionCard extends React.Component {
   }
 
   render() {
-    console.log("render is here! And mode value is: " + this.state.questionMode);
     return (
       <Card style={styles.card}>
         {this.loadQuestionCard()}
