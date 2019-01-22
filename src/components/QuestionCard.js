@@ -6,46 +6,85 @@ import * as firebase from 'firebase';
 import moment from 'moment';
 
 export default class QuestionCard extends React.Component {
-  state = {
-    questionMode: null,
-    answeredToday: null,
-    lastAnswerWasCorrect: null,
-    score: null,
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      questionMode: null,
+      answeredToday: null,
+      lastAnswerWasCorrect: null,
+      score: null,
+    }
+
+    this.userId = firebase.auth().currentUser.uid;
   }
 
-  componentWillMount() {
-    var userId = firebase.auth().currentUser.uid;
-    this.fetchUserData(userId);
+  componentDidMount() {
+    this.fetchUserData();
   }
 
-  storeUserData(userId) {
-    firebase.database().ref('users/' + userId).set({
-      lastAnswerDate: [2019, 0, 20], //trocar por 'ontem'
-      lastAnswerWasCorrect: false,
-      score: 0,
-    })
-    .then(() => {console.log('Success at storeTeste')})
-    .catch((error) => {console.log(error)})
-  }
-
-  fetchUserData(userId) {
-    firebase.database().ref('users/' + userId).on('value', (snapshot) => {
+  fetchUserData = async () => {
+    await firebase.database().ref('users/' + this.userId).on('value', (snapshot) => {
       // If user data does not exist, it'll be created
       if (!snapshot.val()) {
-        this.storeUserData(userId)
+        this.storeUserData()
       }
       else {
         const lastAnswerDate = snapshot.val().lastAnswerDate;
-        this.setAnsweredTodayFromDate(lastAnswerDate);
-
         const lastAnswerWasCorrect = snapshot.val().lastAnswerWasCorrect;
-        this.setLastAnswerWasCorrect(lastAnswerWasCorrect);
-
         const score = snapshot.val().score;
-        this.setScore(score);
 
-        this.updateQuestionMode();
+        this.setUserDataStates(lastAnswerDate, lastAnswerWasCorrect, score);
       }
+    });
+  }
+
+  storeUserData = async () => {
+    const yesterday = moment().subtract(1, 'day');
+    const yesterdayDate = [
+      yesterday.get('year'), yesterday.get('month'), yesterday.get('date')
+    ];
+    console.log(yesterdayDate)
+
+    await firebase.database().ref('users/' + this.userId).set({
+      lastAnswerDate: yesterdayDate,
+      lastAnswerWasCorrect: false,
+      score: 0,
+    })
+    .then(() => {console.log('Success at storeUserData')})
+    .catch((error) => {console.log(error)})
+  }
+
+  updateUserData = async (answeredCorrect) => {
+    const today = moment();
+    const todayDate = [
+      today.get('year'), today.get('month'), today.get('date')
+    ];
+    console.log(todayDate)
+    const pointsToAdd = 50;
+    const newScore = answeredCorrect ? this.state.score + pointsToAdd : this.state.score;
+
+    await firebase.database().ref('users/' + this.userId).set({
+      lastAnswerDate: todayDate,
+      lastAnswerWasCorrect: answeredCorrect,
+      score: newScore,
+    })
+    .then(() => {console.log('Success at updateUserData')})
+    .catch((error) => {console.log(error)})
+  }
+
+  setUserDataStates = (lastAnswerDate, lastAnswerWasCorrect, score) => {
+    var today = moment();
+    var lastAnswer = moment(lastAnswerDate);
+    var daysFromLastAnswer = today.diff(lastAnswer, 'days');
+    var answeredToday = daysFromLastAnswer == 0 ? true : false;
+
+    this.setState(prevState => ({
+      answeredToday: answeredToday,
+      lastAnswerWasCorrect: lastAnswerWasCorrect,
+      score: score
+    }), () => {
+      this.updateQuestionMode();
     });
   }
 
@@ -53,7 +92,7 @@ export default class QuestionCard extends React.Component {
     const answeredToday = this.state.answeredToday;
     const lastAnswerWasCorrect = this.state.lastAnswerWasCorrect;
 
-    if (answeredToday){
+    if (answeredToday) {
       if (lastAnswerWasCorrect)
       this.setQuestionMode(1);
       else
@@ -63,45 +102,10 @@ export default class QuestionCard extends React.Component {
     }
   }
 
-  setAnsweredTodayFromDate = lastAnswerDate => {
-    var today = moment();
-    var lastAnswer = moment(lastAnswerDate);
-    var daysFromLastAnswer = today.diff(lastAnswer, 'days');
-    console.log("f: daysFromLastAnswer: " + daysFromLastAnswer);
-
-    var answeredToday = daysFromLastAnswer == 0 ? true : false;
-    console.log("f: answeredToday: " + answeredToday);
-
-    this.setState((prevState) => {
-      return {answeredToday: answeredToday}
-    })
-  }
-
-  setLastAnswerWasCorrect = lastAnswerWasCorrect => {
-    this.setState((prevState) => {
-      return {lastAnswerWasCorrect: lastAnswerWasCorrect}
-    })
-  }
-
-  setScore = score => {
-    this.setState((prevState) => {
-      return {score: score}
-    })
-  }
-
   setQuestionMode = questionMode => {
     this.setState((prevState) => {
       return {questionMode: questionMode}
     })
-  }
-
-  render() {
-    console.log("render is here! And mode value is: " + this.state.questionMode);
-    return (
-      <Card style={styles.card}>
-        {this.loadQuestionCard()}
-      </Card>
-    );
   }
 
   loadQuestionCard() {
@@ -201,8 +205,41 @@ export default class QuestionCard extends React.Component {
   }
 
   onCardButtonPress = mode => {
-    //console.log('Pressed Daily Question Card Button');
-    this.setQuestionMode(mode);
+    console.log("clicked to mode: " + mode);
+    var answeredCorrect = null;
+    switch (mode) {
+      case 0:
+      // RESETAR
+      console.log("Reset mannualy at firebase database");
+      break;
+      case 1:
+      // RESPOSTA CERTA
+      answeredCorrect = true;
+      this.updateUserData(answeredCorrect);
+      break;
+      case 2:
+      // RESPOSTA ERRADA
+      answeredCorrect = false;
+      this.updateUserData(answeredCorrect);
+      break;
+      case 3:
+      // RESPONDER
+      // Check date
+      this.setQuestionMode(3); // temporary // Fix
+      break;
+      default:
+      console.log("Error at onCardButtonPress");
+      break;
+    }
+  }
+
+  render() {
+    console.log("render is here! And mode value is: " + this.state.questionMode);
+    return (
+      <Card style={styles.card}>
+        {this.loadQuestionCard()}
+      </Card>
+    );
   }
 }
 
