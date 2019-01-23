@@ -12,9 +12,10 @@ export default class QuestionCard extends React.Component {
 
     this.state = {
       questionMode: null,
-      answeredToday: null,
+      userAnsweredToday: null,
       lastAnswerWasCorrect: null,
-      score: null
+      score: null,
+      dailyQuestion: null
     }
 
     this.userId = firebase.auth().currentUser.uid;
@@ -22,12 +23,10 @@ export default class QuestionCard extends React.Component {
 
   componentDidMount() {
     this.fetchUserData();
-    // this.storeQuestionData();
   }
 
   fetchUserData = async () => {
     await firebase.database().ref('users/' + this.userId).on('value', (snapshot) => {
-      // If user data does not exist, it'll be created
       if (!snapshot.val()) {
         this.storeUserData()
       }
@@ -77,10 +76,10 @@ export default class QuestionCard extends React.Component {
     var today = moment();
     var lastAnswer = moment(lastAnswerDate);
     var daysFromLastAnswer = today.diff(lastAnswer, 'days');
-    var answeredToday = daysFromLastAnswer == 0 ? true : false;
+    var userAnsweredToday = daysFromLastAnswer == 0 ? true : false;
 
     this.setState(prevState => ({
-      answeredToday: answeredToday,
+      userAnsweredToday: userAnsweredToday,
       lastAnswerWasCorrect: lastAnswerWasCorrect,
       score: score
     }), () => {
@@ -89,10 +88,10 @@ export default class QuestionCard extends React.Component {
   }
 
   updateQuestionMode = () => {
-    const answeredToday = this.state.answeredToday;
+    const userAnsweredToday = this.state.userAnsweredToday;
     const lastAnswerWasCorrect = this.state.lastAnswerWasCorrect;
 
-    if (answeredToday) {
+    if (userAnsweredToday) {
       if (lastAnswerWasCorrect)
       this.setQuestionMode(1);
       else
@@ -108,13 +107,64 @@ export default class QuestionCard extends React.Component {
     })
   }
 
-  getDailyAnswersCount = async (date) => {
-    var answersCount;
-    await firebase.database().ref('questions/' + date).once('value', (snapshot) => {
-      answersCount = snapshot.numChildren();
-      //return snapshot.numChildren();
+  answerQuestion = async () => {
+    var dailyQuestion = await this.fetchQuestionData();
+    this.setState(prevState => ({
+      dailyQuestion: dailyQuestion,
+    }), () => {
+      this.setQuestionMode(3);
     });
-    return answersCount;
+    console.log(this.state.dailyQuestion);
+  }
+
+  fetchQuestionData = async () => {
+    var today = moment().format('YYYYMMDD');
+    var answeredToday = await this.getAnsweredToday(today);
+    var dailyQuestions = await this.getDailyQuestionsCount(today);
+    if (dailyQuestions == 0) {
+      console.log("No questions for today!");
+      // TODO: novo modo = no questions for today.
+      return;
+    }
+
+    var questionToBeChoosen = answeredToday % dailyQuestions;
+    console.log("choose: " + questionToBeChoosen);
+    var dailyQuestion;
+    await firebase.database().ref('questions/' + today + '/' + questionToBeChoosen)
+    .once('value', (snapshot) => {
+      dailyQuestion = snapshot.val();
+      console.log(snapshot.val());
+    });
+    return dailyQuestion;
+  }
+
+  setAnsweredToday = async (date, value) => {
+    await firebase.database().ref('questions/answersCount/' + date).set({
+      answeredToday: value,
+    })
+    .then(() => {console.log('Success at setAnsweredToday')})
+    .catch((error) => {console.log(error)})
+  }
+
+  getAnsweredToday = async (date) => {
+    var answeredToday;
+    await firebase.database().ref('questions/answersCount/' + date).once('value', (snapshot) => {
+      if (!snapshot.val()) {
+        answeredToday = 0;
+        this.setAnsweredToday(date, answeredToday);
+      } else {
+        answeredToday = snapshot.val().answeredToday;
+      }
+    });
+    return answeredToday;
+  }
+
+  getDailyQuestionsCount = async (date) => {
+    var questionsCount;
+    await firebase.database().ref('questions/' + date).once('value', (snapshot) => {
+      questionsCount = snapshot.numChildren();
+    });
+    return questionsCount;
   }
 
   // TODO: Uma das abas vai ter de ser para cadastrar as questões
@@ -133,7 +183,7 @@ export default class QuestionCard extends React.Component {
       }
     }
 
-    var questionId = await this.getDailyAnswersCount(questionData.date);
+    var questionId = await this.getDailyQuestionsCount(questionData.date);
     await firebase.database().ref('questions/' + questionData.date).child(questionId)
     .set(questionData.data)
     .then(() => {console.log('Success at storeQuestionData')})
@@ -268,8 +318,7 @@ export default class QuestionCard extends React.Component {
       break;
       case 3:
       // RESPONDER
-      // Check date
-      this.setQuestionMode(3); // temporary // Fix
+      this.answerQuestion();
       break;
       default:
       console.log("Error at onCardButtonPress");
