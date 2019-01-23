@@ -127,6 +127,7 @@ export default class QuestionCard extends React.Component {
     var today = moment().format('YYYYMMDD');
     var answeredToday = await this.getAnsweredToday(today);
     var dailyQuestions = await this.getDailyQuestionsCount(today);
+    console.log('w: ' + dailyQuestions)
     if (dailyQuestions == 0) {
       console.log("No questions for today!");
       return null;
@@ -165,32 +166,10 @@ export default class QuestionCard extends React.Component {
   getDailyQuestionsCount = async (date) => {
     var questionsCount;
     await firebase.database().ref('questions/' + date).once('value', (snapshot) => {
+      console.log('a: ' + snapshot.numChildren())
       questionsCount = snapshot.numChildren();
     });
     return questionsCount;
-  }
-
-  // TODO: Uma das abas vai ter de ser para cadastrar as questões
-  storeQuestionData = async () => {
-    // receive questionData
-    var questionData = {
-      date: '20190123',
-      data: {
-        chapter: 'Mateus 2',
-        statement: 'De que lugar uns magos vieram à procura de Jesus?',
-        optionA: 'Das terras do Sul',
-        optionB: 'Das terras do Norte',
-        optionC: 'Das terras do Oriente',
-        optionD: 'Das terras do Ocidente',
-        correctOption: 3,
-      }
-    }
-
-    var questionId = await this.getDailyQuestionsCount(questionData.date);
-    await firebase.database().ref('questions/' + questionData.date).child(questionId)
-    .set(questionData.data)
-    .then(() => {console.log('Success at storeQuestionData')})
-    .catch((error) => {console.log(error)})
   }
 
   loadQuestionCard() {
