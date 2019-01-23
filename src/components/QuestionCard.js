@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 import CountDown from 'react-native-countdown-component';
 
@@ -11,7 +11,7 @@ export default class QuestionCard extends React.Component {
     super(props);
 
     this.state = {
-      questionMode: null,
+      questionMode: 0,
       userAnsweredToday: null,
       lastAnswerWasCorrect: null,
       score: null,
@@ -63,6 +63,9 @@ export default class QuestionCard extends React.Component {
     const pointsToAdd = 50;
     const newScore = answeredCorrect ? this.state.score + pointsToAdd : this.state.score;
 
+    var answeredToday = await this.getAnsweredToday(today.format('YYYYMMDD'));
+    await this.setAnsweredToday(today.format('YYYYMMDD'), ++answeredToday);
+
     await firebase.database().ref('users/' + this.userId).set({
       lastAnswerDate: todayDate,
       lastAnswerWasCorrect: answeredCorrect,
@@ -93,11 +96,11 @@ export default class QuestionCard extends React.Component {
 
     if (userAnsweredToday) {
       if (lastAnswerWasCorrect)
-      this.setQuestionMode(1);
+      this.setQuestionMode(3);
       else
-      this.setQuestionMode(2);
+      this.setQuestionMode(4);
     } else {
-      this.setQuestionMode(0);
+      this.setQuestionMode(1);
     }
   }
 
@@ -107,14 +110,17 @@ export default class QuestionCard extends React.Component {
     })
   }
 
-  answerQuestion = async () => {
+  makeQuestion = async () => {
     var dailyQuestion = await this.fetchQuestionData();
-    this.setState(prevState => ({
-      dailyQuestion: dailyQuestion,
-    }), () => {
-      this.setQuestionMode(3);
-    });
-    console.log(this.state.dailyQuestion);
+    if (!dailyQuestion) {
+      this.setQuestionMode(5);
+    } else {
+      this.setState(prevState => ({
+        dailyQuestion: dailyQuestion,
+      }), () => {
+        this.setQuestionMode(2);
+      });
+    }
   }
 
   fetchQuestionData = async () => {
@@ -123,17 +129,14 @@ export default class QuestionCard extends React.Component {
     var dailyQuestions = await this.getDailyQuestionsCount(today);
     if (dailyQuestions == 0) {
       console.log("No questions for today!");
-      // TODO: novo modo = no questions for today.
-      return;
+      return null;
     }
 
     var questionToBeChoosen = answeredToday % dailyQuestions;
-    console.log("choose: " + questionToBeChoosen);
     var dailyQuestion;
     await firebase.database().ref('questions/' + today + '/' + questionToBeChoosen)
     .once('value', (snapshot) => {
       dailyQuestion = snapshot.val();
-      console.log(snapshot.val());
     });
     return dailyQuestion;
   }
@@ -191,64 +194,100 @@ export default class QuestionCard extends React.Component {
   }
 
   loadQuestionCard() {
-    // 0 = Not answered
-    // 1 = Correct answer
-    // 2 = Wrong answer
-    // 3 = Answering
+    // 0 = Loading
+    // 1 = Not answered
+    // 2 = Answering
+    // 3 = Right answer
+    // 4 = Wrong answer
+    // 5 = No questions
 
     switch (this.state.questionMode) {
       case 0:
       return (
         <Card.Content style={styles.cardContent}>
-          <Text style={styles.cardTitle}>
-            PERGUNTA DO DIA
-          </Text>
-          <Text style={styles.cardParagraph}>
-            Não respondida.
-          </Text>
-          <Button
-            style={styles.cardButton}
-            mode="contained"
-            color="#004488"
-            onPress={() => this.onCardButtonPress(3)}>
-            RESPONDER!
-          </Button>
+          <ActivityIndicator />
         </Card.Content>
       );
       break;
       case 1:
       return (
         <Card.Content style={styles.cardContent}>
-          <Text style={styles.cardTitle}>
-            PERGUNTA DO DIA
-          </Text>
-          <Text style={styles.cardParagraph}>
-            Resposta certa.
-          </Text>
-          <Button style={styles.cardButton}
-            mode="contained"
-            color="#004488"
-            onPress={() => this.onCardButtonPress(0)}>
-            RESETAR!
-          </Button>
+          <View>
+            <Text style={styles.cardTitle}>
+              PERGUNTA DO DIA
+            </Text>
+            <Text style={styles.cardTitle}>
+              MATEUS 1 - 3
+            </Text>
+          </View>
+          <View>
+            <Text style={styles.cardParagraph}>
+              Não respondida.
+            </Text>
+          </View>
+          <View>
+            <Button
+              style={styles.cardButton}
+              mode="contained"
+              color="#004488"
+              onPress={() => this.makeQuestion()}>
+              RESPONDER!
+            </Button>
+          </View>
         </Card.Content>
       );
       break;
       case 2:
       return (
         <Card.Content style={styles.cardContent}>
-          <Text style={styles.cardTitle}>
-            PERGUNTA DO DIA
-          </Text>
-          <Text style={styles.cardParagraph}>
-            Resposta errada.
-          </Text>
-          <Button style={styles.cardButton}
-            mode="contained"
-            color="#004488"
-            onPress={() => this.onCardButtonPress(0)}>
-            RESETAR!
-          </Button>
+          <View>
+            <Text style={styles.cardTitle}>
+              PERGUNTA DO DIA
+            </Text>
+            <Text style={styles.cardTitle}>
+              MATEUS 1 - 3
+            </Text>
+            <CountDown
+              until={10}
+              size={15}
+              onFinish={() => this.answerQuestion(0)}
+              digitStyle={{backgroundColor: '#1CC625'}}
+              digitTxtStyle={{color: '#FFF'}}
+              timeToShow={['S']}
+              timeLabels={{s: ''}}
+            />
+          </View>
+          <View>
+            <Text style={styles.cardParagraph}>
+              {this.state.dailyQuestion.statement}
+            </Text>
+          </View>
+          <View>
+            <Button style={styles.cardButton}
+              mode="contained"
+              color="#004488"
+              onPress={() => this.answerQuestion(1)}>
+              {this.state.dailyQuestion.optionA}
+            </Button>
+            <Button style={styles.cardButton}
+              mode="contained"
+              color="#004488"
+              onPress={() => this.answerQuestion(2)}>
+              {this.state.dailyQuestion.optionB}
+            </Button>
+            <Button style={styles.cardButton}
+              mode="contained"
+              color="#004488"
+              onPress={() => this.answerQuestion(3)}>
+              {this.state.dailyQuestion.optionC}
+            </Button>
+            <Button style={styles.cardButton}
+              mode="contained"
+              color="#004488"
+              onPress={() => this.answerQuestion(4)}>
+              {this.state.dailyQuestion.optionD}
+            </Button>
+          </View>
         </Card.Content>
       );
       break;
@@ -259,70 +298,84 @@ export default class QuestionCard extends React.Component {
             <Text style={styles.cardTitle}>
               PERGUNTA DO DIA
             </Text>
-            <CountDown
-              until={10}
-              size={15}
-              onFinish={() => this.onCardButtonPress(2)}
-              digitStyle={{backgroundColor: '#1CC625'}}
-              digitTxtStyle={{color: '#FFF'}}
-              timeToShow={['S']}
-              timeLabels={{s: ''}}
-            />
-          </View>
-          <View>
-            <Text style={styles.cardParagraph}>
-              Respondendo.
+            <Text style={styles.cardTitle}>
+              MATEUS 1 - 3
             </Text>
           </View>
           <View>
-            <Button style={styles.cardButton}
-              mode="contained"
-              color="#004488"
-              onPress={() => this.onCardButtonPress(1)}>
-              RESPOSTA CERTA
-            </Button>
-            <Button style={styles.cardButton}
-              mode="contained"
-              color="#004488"
-              onPress={() => this.onCardButtonPress(2)}>
-              RESPOSTA ERRADA
-            </Button>
+            <Text style={styles.cardParagraph}>
+              Você acertou a pergunta de hoje :)
+            </Text>
+            <Text style={styles.cardParagraph}>
+              Volte amanhã pra ganhar mais pontos!
+            </Text>
+          </View>
+          <View>
+          </View>
+        </Card.Content>
+      );
+      break;
+      case 4:
+      return (
+        <Card.Content style={styles.cardContent}>
+          <View>
+            <Text style={styles.cardTitle}>
+              PERGUNTA DO DIA
+            </Text>
+            <Text style={styles.cardTitle}>
+              MATEUS 1 - 3
+            </Text>
+          </View>
+          <View>
+            <Text style={styles.cardParagraph}>
+              Você errou a pergunta de hoje :/
+            </Text>
+            <Text style={styles.cardParagraph}>
+              Tente novamente amanhã, e não fique pra trás!
+            </Text>
+          </View>
+          <View>
+          </View>
+        </Card.Content>
+      );
+      break;
+      case 5:
+      return (
+        <Card.Content style={styles.cardContent}>
+          <View>
+            <Text style={styles.cardTitle}>
+              PERGUNTA DO DIA
+            </Text>
+            <Text style={styles.cardTitle}>
+              MATEUS 1 - 3
+            </Text>
+          </View>
+          <View>
+            <Text style={styles.cardParagraph}>
+              Hoje não tem pergunta :(
+            </Text>
+          </View>
+          <View>
           </View>
         </Card.Content>
       );
       break;
       default:
-      // Loading...
-      // console.log("questionMode is null!");
+      console.log("Error at questionMode!");
       break;
     }
   }
 
-  onCardButtonPress = mode => {
-    console.log("clicked to mode: " + mode);
+  answerQuestion = answer => {
     var answeredCorrect = null;
-    switch (mode) {
-      case 0:
-      // RESETAR
-      console.log("Reset mannualy at firebase database");
-      break;
-      case 1:
-      // RESPOSTA CERTA
+    if (answer == this.state.dailyQuestion.correctOption) {
+      console.log("Acertou miseravel");
       answeredCorrect = true;
       this.updateUserData(answeredCorrect);
-      break;
-      case 2:
-      // RESPOSTA ERRADA
+    } else {
+      console.log("Hoje não!");
       answeredCorrect = false;
       this.updateUserData(answeredCorrect);
-      break;
-      case 3:
-      // RESPONDER
-      this.answerQuestion();
-      break;
-      default:
-      console.log("Error at onCardButtonPress");
-      break;
     }
   }
 
