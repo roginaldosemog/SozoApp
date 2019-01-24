@@ -28,7 +28,8 @@ export default class QuestionCard extends React.Component {
   fetchUserData = async () => {
     await firebase.database().ref('users/' + this.userId).on('value', (snapshot) => {
       if (!snapshot.val()) {
-        this.storeUserData()
+        // this.storeUserData();
+        console.log("Error fetching user data")
       }
       else {
         const lastAnswerDate = snapshot.val().lastAnswerDate;
@@ -38,21 +39,6 @@ export default class QuestionCard extends React.Component {
         this.setUserDataStates(lastAnswerDate, lastAnswerWasCorrect, score);
       }
     });
-  }
-
-  storeUserData = async () => {
-    const yesterday = moment().subtract(1, 'day');
-    const yesterdayDate = [
-      yesterday.get('year'), yesterday.get('month'), yesterday.get('date')
-    ];
-
-    await firebase.database().ref('users/' + this.userId).set({
-      lastAnswerDate: yesterdayDate,
-      lastAnswerWasCorrect: false,
-      score: 0,
-    })
-    .then(() => {console.log('Success at storeUserData')})
-    .catch((error) => {console.log(error)})
   }
 
   updateUserData = async (answeredCorrect) => {
@@ -66,7 +52,7 @@ export default class QuestionCard extends React.Component {
     var answeredToday = await this.getAnsweredToday(today.format('YYYYMMDD'));
     await this.setAnsweredToday(today.format('YYYYMMDD'), ++answeredToday);
 
-    await firebase.database().ref('users/' + this.userId).set({
+    await firebase.database().ref('users/' + this.userId).update({
       lastAnswerDate: todayDate,
       lastAnswerWasCorrect: answeredCorrect,
       score: newScore,
@@ -127,7 +113,6 @@ export default class QuestionCard extends React.Component {
     var today = moment().format('YYYYMMDD');
     var answeredToday = await this.getAnsweredToday(today);
     var dailyQuestions = await this.getDailyQuestionsCount(today);
-    console.log('w: ' + dailyQuestions)
     if (dailyQuestions == 0) {
       console.log("No questions for today!");
       return null;
@@ -166,7 +151,6 @@ export default class QuestionCard extends React.Component {
   getDailyQuestionsCount = async (date) => {
     var questionsCount;
     await firebase.database().ref('questions/' + date).once('value', (snapshot) => {
-      console.log('a: ' + snapshot.numChildren())
       questionsCount = snapshot.numChildren();
     });
     return questionsCount;

@@ -7,10 +7,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-
-  ActivityIndicator,
-  AsyncStorage,
-  //Button,
   StatusBar,
 } from 'react-native';
 import {
@@ -18,17 +14,20 @@ import {
   Caption,
   Paragraph,
   Card,
-  Button
+  Button,
+  Appbar
 } from 'react-native-paper';
 import { WebBrowser } from 'expo';
 import * as firebase from 'firebase';
 
-import { MonoText } from '../components/StyledText';
-import QuestionCard from '../components/QuestionCard';
+import { MonoText } from '../../components/StyledText';
+import QuestionCard from '../../components/QuestionCard';
 
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
-    title: 'Home',
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerTitle: 'SOZOApp',
+    };
   };
 
   render() {
