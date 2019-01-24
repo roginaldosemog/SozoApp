@@ -26,13 +26,7 @@ import QuestionCard from '../../components/QuestionCard';
 export default class HomeScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     return {
-      headerTitle: 'Home',
-      headerRight: (
-        <Appbar.Action
-          icon="person"
-          onPress={() => navigation.navigate('Profile')}
-        />
-      ),
+      headerTitle: 'SOZOApp',
     };
   };
 

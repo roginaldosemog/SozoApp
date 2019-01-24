@@ -13,7 +13,7 @@ const initialState = {
   correctOption: '',
 };
 
-export default class SettingsScreen extends React.Component {
+export default class CreateQuestionScreen extends React.Component {
   static navigationOptions = {
     title: 'Cadastrar Pergunta',
   };

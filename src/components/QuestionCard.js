@@ -28,7 +28,8 @@ export default class QuestionCard extends React.Component {
   fetchUserData = async () => {
     await firebase.database().ref('users/' + this.userId).on('value', (snapshot) => {
       if (!snapshot.val()) {
-        this.storeUserData()
+        // this.storeUserData();
+        console.log("Error fetching user data")
       }
       else {
         const lastAnswerDate = snapshot.val().lastAnswerDate;
@@ -38,21 +39,6 @@ export default class QuestionCard extends React.Component {
         this.setUserDataStates(lastAnswerDate, lastAnswerWasCorrect, score);
       }
     });
-  }
-
-  storeUserData = async () => {
-    const yesterday = moment().subtract(1, 'day');
-    const yesterdayDate = [
-      yesterday.get('year'), yesterday.get('month'), yesterday.get('date')
-    ];
-
-    await firebase.database().ref('users/' + this.userId).set({
-      lastAnswerDate: yesterdayDate,
-      lastAnswerWasCorrect: false,
-      score: 0,
-    })
-    .then(() => {console.log('Success at storeUserData')})
-    .catch((error) => {console.log(error)})
   }
 
   updateUserData = async (answeredCorrect) => {

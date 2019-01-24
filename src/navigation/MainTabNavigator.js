@@ -4,27 +4,11 @@ import { createStackNavigator, createBottomTabNavigator } from 'react-navigation
 
 import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/app/HomeScreen';
-import LinksScreen from '../screens/app/LinksScreen';
-import SettingsScreen from '../screens/app/SettingsScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
-
-// const ProfileStack = createStackNavigator({
-//   Profile: ProfileScreen,
-// });
-//
-// ProfileStack.navigationOptions = {
-//   tabBarLabel: 'Profile',
-//   tabBarIcon: ({ focused }) => (
-//     <TabBarIcon
-//       focused={focused}
-//       name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'}
-//     />
-//   ),
-// };
+import CreateQuestionScreen from '../screens/profile/CreateQuestionScreen';
 
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
-  Profile: ProfileScreen
 });
 
 HomeStack.navigationOptions = {
@@ -63,12 +47,12 @@ HomeStack.navigationOptions = ({ navigation }) => {
   };
 };
 
-const LinksStack = createStackNavigator({
-  Links: LinksScreen,
-  Profile: ProfileScreen
+const ProfileStack = createStackNavigator({
+  Profile: ProfileScreen,
+  CreateQuestion: CreateQuestionScreen,
 });
 
-LinksStack.navigationOptions = ({ navigation }) => {
+ProfileStack.navigationOptions = ({ navigation }) => {
   let tabBarVisible = true;
   if (navigation.state.index > 0) {
     tabBarVisible = false;
@@ -76,34 +60,11 @@ LinksStack.navigationOptions = ({ navigation }) => {
 
   return {
     tabBarVisible,
-    tabBarLabel: 'Links',
+    tabBarLabel: 'Perfil',
     tabBarIcon: ({ focused }) => (
       <TabBarIcon
         focused={focused}
-        name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'}
-      />
-    ),
-  };
-};
-
-const SettingsStack = createStackNavigator({
-  Settings: SettingsScreen,
-  Profile: ProfileScreen
-});
-
-SettingsStack.navigationOptions = ({ navigation }) => {
-  let tabBarVisible = true;
-  if (navigation.state.index > 0) {
-    tabBarVisible = false;
-  }
-
-  return {
-    tabBarVisible,
-    tabBarLabel: 'Settings',
-    tabBarIcon: ({ focused }) => (
-      <TabBarIcon
-        focused={focused}
-        name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'}
+        name={Platform.OS === 'ios' ? 'ios-person' : 'md-person'}
       />
     ),
   };
@@ -111,6 +72,5 @@ SettingsStack.navigationOptions = ({ navigation }) => {
 
 export default createBottomTabNavigator({
   HomeStack,
-  LinksStack,
-  SettingsStack,
+  ProfileStack,
 });
