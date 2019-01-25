@@ -21,6 +21,8 @@ export default class QuestionCard extends React.Component {
       actualPlanDate: null,
       actualPlanChapter: null,
       planDates: PlanDates.planDates,
+      correctStreak: null,
+      correctRecord: null,
     }
 
     this.userId = firebase.auth().currentUser.uid;
@@ -42,11 +44,9 @@ export default class QuestionCard extends React.Component {
     var initial = moment(initialPlanDate);
     actualPlanDate = today.diff(initial, 'days');
     actualPlanChapter = this.state.planDates[actualPlanDate].title;
-    console.log(actualPlanChapter);
 
     actualPlanDate++;
     actualPlanDate = ("0" + actualPlanDate).slice(-2);
-    console.log(actualPlanDate);
 
     this.setState(prevState => ({
       initialPlanDate: initialPlanDate,
@@ -65,8 +65,10 @@ export default class QuestionCard extends React.Component {
         const lastAnswerDate = snapshot.val().lastAnswerDate;
         const lastAnswerWasCorrect = snapshot.val().lastAnswerWasCorrect;
         const score = snapshot.val().score;
+        const correctStreak = snapshot.val().correctStreak;
+        const correctRecord = snapshot.val().correctRecord;
 
-        this.setUserDataStates(lastAnswerDate, lastAnswerWasCorrect, score);
+        this.setUserDataStates(lastAnswerDate, lastAnswerWasCorrect, score, correctStreak, correctRecord);
       }
     });
   }
@@ -79,6 +81,10 @@ export default class QuestionCard extends React.Component {
     const pointsToAdd = 50;
     const newScore = answeredCorrect ? this.state.score + pointsToAdd : this.state.score;
 
+    const correctStreak = answeredCorrect ? this.state.correctStreak + 1 : 0;
+    const correctRecord = correctStreak > this.state.correctRecord ?
+    correctStreak : this.state.correctRecord;
+
     var answeredToday = await this.getAnsweredToday(today.format('YYYYMMDD'));
     await this.setAnsweredToday(today.format('YYYYMMDD'), ++answeredToday);
 
@@ -86,21 +92,27 @@ export default class QuestionCard extends React.Component {
       lastAnswerDate: todayDate,
       lastAnswerWasCorrect: answeredCorrect,
       score: newScore,
+      correctStreak: correctStreak,
+      correctRecord: correctRecord,
     })
     .then(() => {console.log('Success at updateUserData')})
     .catch((error) => {console.log(error)})
   }
 
-  setUserDataStates = (lastAnswerDate, lastAnswerWasCorrect, score) => {
+  setUserDataStates = async (lastAnswerDate, lastAnswerWasCorrect, score, correctStreak, correctRecord) => {
     var today = moment();
     var lastAnswer = moment(lastAnswerDate);
     var daysFromLastAnswer = today.diff(lastAnswer, 'days');
+
     var userAnsweredToday = daysFromLastAnswer == 0 ? true : false;
+    var newCorrectStreak = daysFromLastAnswer > 1 ? 0 : correctStreak;
 
     this.setState(prevState => ({
       userAnsweredToday: userAnsweredToday,
       lastAnswerWasCorrect: lastAnswerWasCorrect,
-      score: score
+      score: score,
+      correctStreak: newCorrectStreak,
+      correctRecord: correctRecord,
     }), () => {
       this.updateQuestionMode();
     });
@@ -157,10 +169,6 @@ export default class QuestionCard extends React.Component {
       dailyQuestion = snapshot.val();
     });
     return dailyQuestion;
-  }
-
-  getPlanInicialDate = async () => {
-
   }
 
   setAnsweredToday = async (date, value) => {
