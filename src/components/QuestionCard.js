@@ -2,9 +2,10 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 import CountDown from 'react-native-countdown-component';
-
 import * as firebase from 'firebase';
 import moment from 'moment';
+
+import PlanDates from '../constants/PlanDates';
 
 export default class QuestionCard extends React.Component {
   constructor(props) {
@@ -15,14 +16,43 @@ export default class QuestionCard extends React.Component {
       userAnsweredToday: null,
       lastAnswerWasCorrect: null,
       score: null,
-      dailyQuestion: null
+      dailyQuestion: null,
+      initialPlanDate: null,
+      actualPlanDate: null,
+      actualPlanChapter: null,
+      planDates: PlanDates.planDates,
     }
 
     this.userId = firebase.auth().currentUser.uid;
   }
 
   componentDidMount() {
+    this.getPlanDates();
     this.fetchUserData();
+  }
+
+  getPlanDates = async () => {
+    var initialPlanDate, actualPlanDate, actualPlanChapter;
+
+    await firebase.database().ref('questions/').on('value', (snapshot) => {
+      initialPlanDate = snapshot.val().initialDate;
+    });
+
+    var today = moment();
+    var initial = moment(initialPlanDate);
+    actualPlanDate = today.diff(initial, 'days');
+    actualPlanChapter = this.state.planDates[actualPlanDate].title;
+    console.log(actualPlanChapter);
+
+    actualPlanDate++;
+    actualPlanDate = ("0" + actualPlanDate).slice(-2);
+    console.log(actualPlanDate);
+
+    this.setState(prevState => ({
+      initialPlanDate: initialPlanDate,
+      actualPlanDate: actualPlanDate,
+      actualPlanChapter: actualPlanChapter
+    }));
   }
 
   fetchUserData = async () => {
@@ -110,9 +140,11 @@ export default class QuestionCard extends React.Component {
   }
 
   fetchQuestionData = async () => {
-    var today = moment().format('YYYYMMDD');
-    var answeredToday = await this.getAnsweredToday(today);
-    var dailyQuestions = await this.getDailyQuestionsCount(today);
+    var today = moment();
+    var actualPlanDate = this.state.actualPlanDate;
+
+    var answeredToday = await this.getAnsweredToday(today.format('YYYYMMDD'));
+    var dailyQuestions = await this.getDailyQuestionsCount(actualPlanDate);
     if (dailyQuestions == 0) {
       console.log("No questions for today!");
       return null;
@@ -120,11 +152,15 @@ export default class QuestionCard extends React.Component {
 
     var questionToBeChoosen = answeredToday % dailyQuestions;
     var dailyQuestion;
-    await firebase.database().ref('questions/' + today + '/' + questionToBeChoosen)
+    await firebase.database().ref('questions/' + actualPlanDate + '/' + questionToBeChoosen)
     .once('value', (snapshot) => {
       dailyQuestion = snapshot.val();
     });
     return dailyQuestion;
+  }
+
+  getPlanInicialDate = async () => {
+
   }
 
   setAnsweredToday = async (date, value) => {
@@ -180,7 +216,7 @@ export default class QuestionCard extends React.Component {
               PERGUNTA DO DIA
             </Text>
             <Text style={styles.cardTitle}>
-              MATEUS 1 - 3
+              {this.state.actualPlanChapter}
             </Text>
           </View>
           <View>
@@ -208,7 +244,7 @@ export default class QuestionCard extends React.Component {
               PERGUNTA DO DIA
             </Text>
             <Text style={styles.cardTitle}>
-              MATEUS 1 - 3
+              {this.state.actualPlanChapter}
             </Text>
             <CountDown
               until={10}
@@ -262,7 +298,7 @@ export default class QuestionCard extends React.Component {
               PERGUNTA DO DIA
             </Text>
             <Text style={styles.cardTitle}>
-              MATEUS 1 - 3
+              {this.state.actualPlanChapter}
             </Text>
           </View>
           <View>
@@ -286,7 +322,7 @@ export default class QuestionCard extends React.Component {
               PERGUNTA DO DIA
             </Text>
             <Text style={styles.cardTitle}>
-              MATEUS 1 - 3
+              {this.state.actualPlanChapter}
             </Text>
           </View>
           <View>
@@ -310,66 +346,66 @@ export default class QuestionCard extends React.Component {
               PERGUNTA DO DIA
             </Text>
             <Text style={styles.cardTitle}>
-              MATEUS 1 - 3
+              {this.state.actualPlanChapter}
             </Text>
           </View>
           <View>
             <Text style={styles.cardParagraph}>
               Hoje não tem pergunta :(
-            </Text>
-          </View>
-          <View>
-          </View>
-        </Card.Content>
+              </Text>
+            </View>
+            <View>
+            </View>
+          </Card.Content>
+        );
+        break;
+        default:
+        console.log("Error at questionMode!");
+        break;
+      }
+    }
+
+    answerQuestion = answer => {
+      var answeredCorrect = null;
+      if (answer == this.state.dailyQuestion.correctOption) {
+        console.log("Acertou miseravel");
+        answeredCorrect = true;
+        this.updateUserData(answeredCorrect);
+      } else {
+        console.log("Hoje não!");
+        answeredCorrect = false;
+        this.updateUserData(answeredCorrect);
+      }
+    }
+
+    render() {
+      return (
+        <Card style={styles.card}>
+          {this.loadQuestionCard()}
+        </Card>
       );
-      break;
-      default:
-      console.log("Error at questionMode!");
-      break;
     }
   }
 
-  answerQuestion = answer => {
-    var answeredCorrect = null;
-    if (answer == this.state.dailyQuestion.correctOption) {
-      console.log("Acertou miseravel");
-      answeredCorrect = true;
-      this.updateUserData(answeredCorrect);
-    } else {
-      console.log("Hoje não!");
-      answeredCorrect = false;
-      this.updateUserData(answeredCorrect);
-    }
-  }
-
-  render() {
-    return (
-      <Card style={styles.card}>
-        {this.loadQuestionCard()}
-      </Card>
-    );
-  }
-}
-
-const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    margin: 4,
-  },
-  cardContent: {
-    flex: 1,
-    alignItems: 'center',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-  },
-  cardTitle: {
-    fontSize: 22,
-    fontWeight: '500',
-  },
-  cardParagraph: {
-    //
-  },
-  cardButton: {
-    marginTop: 10,
-  },
-});
+  const styles = StyleSheet.create({
+    card: {
+      flex: 1,
+      margin: 4,
+    },
+    cardContent: {
+      flex: 1,
+      alignItems: 'center',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+    },
+    cardTitle: {
+      fontSize: 22,
+      fontWeight: '500',
+    },
+    cardParagraph: {
+      //
+    },
+    cardButton: {
+      marginTop: 10,
+    },
+  });
