@@ -1,16 +1,18 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, Button, Alert } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, Alert, Picker } from 'react-native';
 import * as firebase from 'firebase';
+import PlanDates from '../../constants/PlanDates';
 
 const initialState = {
   date: '',
-  chapter: '',
+  chapter: '01',
   statement: '',
   optionA: '',
   optionB: '',
   optionC: '',
   optionD: '',
   correctOption: '',
+  planDates: PlanDates.planDates,
 };
 
 export default class CreateQuestionScreen extends React.Component {
@@ -34,8 +36,10 @@ export default class CreateQuestionScreen extends React.Component {
       }
     }
 
-    var questionId = await this.getDailyQuestionsCount(question.date);
-    await firebase.database().ref('questions/' + question.date).child(questionId)
+    console.log(question.data.chapter);
+
+    var questionId = await this.getDailyQuestionsCount(question.data.chapter);
+    await firebase.database().ref('questions/' + question.data.chapter).child(questionId)
     .set(question.data)
     .then(() => {
       Alert.alert("Pergunta cadastrada!");
@@ -53,6 +57,12 @@ export default class CreateQuestionScreen extends React.Component {
   }
 
   render() {
+    const pickerItems = this.state.planDates.map(date => {
+      return (
+        <Picker.Item key={date.id} label={date.title} value={date.id} />
+      )
+    })
+
     return (
       <View style={{paddingTop:50, alignItems:"center"}}>
 
@@ -66,12 +76,12 @@ export default class CreateQuestionScreen extends React.Component {
         />
         <View style={{paddingTop:10}} />
 
-        <TextInput style={{width: 200, height: 40, borderWidth: 1}}
-          value={this.state.chapter}
-          onChangeText={(chapter) => { this.setState({chapter: chapter}) }}
-          placeholder="Capítulo"
-          autoCorrect={false}
-        />
+        <Picker
+          selectedValue={this.state.chapter}
+          style={{ height: 50, width: 200 }}
+          onValueChange={(itemValue, itemIndex) => this.setState({chapter: itemValue})}>
+          {pickerItems}
+        </Picker>
         <View style={{paddingTop:10}} />
 
         <TextInput style={{width: 200, height: 40, borderWidth: 1}}
