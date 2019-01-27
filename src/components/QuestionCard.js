@@ -34,15 +34,15 @@ export default class QuestionCard extends React.Component {
   }
 
   getPlanDates = async () => {
-    var initialPlanDate, actualPlanDate, actualPlanChapter;
+    var initialPlanDate, actualPlanChapter;
 
-    await firebase.database().ref('questions/').on('value', (snapshot) => {
+    await firebase.database().ref('questions/').once('value', (snapshot) => {
       initialPlanDate = snapshot.val().initialDate;
     });
 
     var today = moment();
-    var initial = moment(initialPlanDate);
-    actualPlanDate = today.diff(initial, 'days');
+    var initial = moment(initialPlanDate.toString());
+    var actualPlanDate = today.diff(initial, 'days');
     actualPlanChapter = this.state.planDates[actualPlanDate].title;
 
     actualPlanDate++;
@@ -359,61 +359,61 @@ export default class QuestionCard extends React.Component {
           </View>
           <View>
             <Text style={styles.cardParagraph}>
-              Hoje não tem pergunta :(
-              </Text>
-            </View>
-            <View>
-            </View>
-          </Card.Content>
-        );
-        break;
-        default:
-        console.log("Error at questionMode!");
-        break;
-      }
-    }
-
-    answerQuestion = answer => {
-      var answeredCorrect = null;
-      if (answer == this.state.dailyQuestion.correctOption) {
-        console.log("Acertou miseravel");
-        answeredCorrect = true;
-        this.updateUserData(answeredCorrect);
-      } else {
-        console.log("Hoje não!");
-        answeredCorrect = false;
-        this.updateUserData(answeredCorrect);
-      }
-    }
-
-    render() {
-      return (
-        <Card style={styles.card}>
-          {this.loadQuestionCard()}
-        </Card>
+              Hoje não tem pergunta!
+            </Text>
+          </View>
+          <View>
+          </View>
+        </Card.Content>
       );
+      break;
+      default:
+      console.log("Error at questionMode!");
+      break;
     }
   }
 
-  const styles = StyleSheet.create({
-    card: {
-      flex: 1,
-      margin: 4,
-    },
-    cardContent: {
-      flex: 1,
-      alignItems: 'center',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-    },
-    cardTitle: {
-      fontSize: 22,
-      fontWeight: '500',
-    },
-    cardParagraph: {
-      //
-    },
-    cardButton: {
-      marginTop: 10,
-    },
-  });
+  answerQuestion = answer => {
+    var answeredCorrect = null;
+    if (answer == this.state.dailyQuestion.correctOption) {
+      console.log("Acertou miseravel");
+      answeredCorrect = true;
+      this.updateUserData(answeredCorrect);
+    } else {
+      console.log("Hoje não!");
+      answeredCorrect = false;
+      this.updateUserData(answeredCorrect);
+    }
+  }
+
+  render() {
+    return (
+      <Card style={styles.card}>
+        {this.loadQuestionCard()}
+      </Card>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  card: {
+    flex: 1,
+    margin: 4,
+  },
+  cardContent: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  cardTitle: {
+    fontSize: 22,
+    fontWeight: '500',
+  },
+  cardParagraph: {
+    //
+  },
+  cardButton: {
+    marginTop: 10,
+  },
+});
