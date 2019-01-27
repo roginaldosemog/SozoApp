@@ -1,13 +1,11 @@
 import React from 'react';
 import {
   ActivityIndicator,
-  AsyncStorage,
-  Button,
+  ImageBackground,
   StatusBar,
   StyleSheet,
   View,
 } from 'react-native';
-import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 import * as firebase from 'firebase';
 
 import ApiKeys from '../constants/ApiKeys';
@@ -29,18 +27,21 @@ export default class AuthLoadingScreen extends React.Component {
   // Render any loading content that you like here
   render() {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator />
-        <StatusBar barStyle="default" />
-      </View>
+      <ImageBackground source={require('../assets/images/splash.png')} style={styles.container}>
+        <ActivityIndicator size="large" color="#881111" style={styles.indicator}/>
+      </ImageBackground>
     );
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
+  },
+  indicator: {
+    marginBottom: 72,
   },
 });

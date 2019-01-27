@@ -386,34 +386,26 @@ export default class QuestionCard extends React.Component {
     }
   }
 
-  render() {
-    return (
-      <Card style={styles.card}>
-        {this.loadQuestionCard()}
-      </Card>
-    );
-  }
-}
-
-const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    margin: 4,
-  },
-  cardContent: {
-    flex: 1,
-    alignItems: 'center',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-  },
-  cardTitle: {
-    fontSize: 22,
-    fontWeight: '500',
-  },
-  cardParagraph: {
-    //
-  },
-  cardButton: {
-    marginTop: 10,
-  },
-});
+  const styles = StyleSheet.create({
+    card: {
+      flex: 1,
+      margin: 4,
+    },
+    cardContent: {
+      flex: 1,
+      alignItems: 'center',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+    },
+    cardTitle: {
+      fontSize: 22,
+      //fontWeight: '500',
+      fontFamily: 'montserrat-bold'
+    },
+    cardParagraph: {
+      //
+    },
+    cardButton: {
+      marginTop: 10,
+    },
+  });
