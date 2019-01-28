@@ -130,6 +130,8 @@ export default class SignUpScreen extends React.Component {
     ];
 
     await firebase.database().ref('users/' + userId).set({
+      correctRecord: 0,
+      correctStreak: 0,
       lastAnswerDate: yesterdayDate,
       lastAnswerWasCorrect: false,
       score: 0,
