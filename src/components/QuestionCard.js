@@ -408,7 +408,8 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 22,
-    fontWeight: '500',
+    // fontWeight: '500',
+    fontFamily: 'montserrat-bold'
   },
   cardParagraph: {
     //
