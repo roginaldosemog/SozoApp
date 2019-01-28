@@ -23,6 +23,7 @@ export default class QuestionCard extends React.Component {
       planDates: PlanDates.planDates,
       correctStreak: null,
       correctRecord: null,
+      isClicked: false,
     }
 
     this.userId = firebase.auth().currentUser.uid;
@@ -78,7 +79,7 @@ export default class QuestionCard extends React.Component {
     const todayDate = [
       today.get('year'), today.get('month'), today.get('date')
     ];
-    const pointsToAdd = 50;
+    const pointsToAdd = 10;
     const newScore = answeredCorrect ? this.state.score + pointsToAdd : this.state.score;
 
     const correctStreak = answeredCorrect ? this.state.correctStreak + 1 : 0;
@@ -95,7 +96,12 @@ export default class QuestionCard extends React.Component {
       correctStreak: correctStreak,
       correctRecord: correctRecord,
     })
-    .then(() => {console.log('Success at updateUserData')})
+    .then(() => {
+      console.log('Success at updateUserData');
+      this.setState(prevState => ({
+        isClicked: false,
+      }));
+    })
     .catch((error) => {console.log(error)})
   }
 
@@ -374,15 +380,20 @@ export default class QuestionCard extends React.Component {
   }
 
   answerQuestion = answer => {
-    var answeredCorrect = null;
-    if (answer == this.state.dailyQuestion.correctOption) {
-      console.log("Acertou miseravel");
-      answeredCorrect = true;
-      this.updateUserData(answeredCorrect);
-    } else {
-      console.log("Hoje não!");
-      answeredCorrect = false;
-      this.updateUserData(answeredCorrect);
+    if (!this.state.isClicked) {
+      var answeredCorrect = null;
+      this.setState(prevState => ({
+        isClicked: true,
+      }), () => {
+        if (answer == this.state.dailyQuestion.correctOption) {
+          console.log("Acertou miseravel");
+          answeredCorrect = true;
+        } else {
+          console.log("Hoje não!");
+          answeredCorrect = false;
+        }
+        this.updateUserData(answeredCorrect);
+      });
     }
   }
 
