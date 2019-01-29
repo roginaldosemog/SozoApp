@@ -1,32 +1,12 @@
 import React from 'react';
-import {
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  StatusBar,
-} from 'react-native';
-import {
-  Title,
-  Caption,
-  Paragraph,
-  Card,
-  Button,
-  Appbar
-} from 'react-native-paper';
-import { WebBrowser } from 'expo';
+import { View, StyleSheet, StatusBar } from 'react-native';
 import * as firebase from 'firebase';
-
-import { MonoText } from '../../components/StyledText';
 import QuestionCard from '../../components/QuestionCard';
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     return {
-      headerTitle: 'SOZOApp',
+      header: null,
     };
   };
 
@@ -42,6 +22,7 @@ export default class HomeScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: (StatusBar.currentHeight + 4),
     padding: 4,
     backgroundColor: '#ddd'
   },
