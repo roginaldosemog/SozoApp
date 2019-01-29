@@ -217,14 +217,14 @@ export default class QuestionCard extends React.Component {
     switch (this.state.questionMode) {
       case 0:
       return (
-        <Card.Content style={styles.cardContent}>
+        <View style={styles.cardContent}>
           <ActivityIndicator />
-        </Card.Content>
+        </View>
       );
       break;
       case 1:
       return (
-        <Card.Content style={styles.cardContent}>
+        <View style={styles.cardContent}>
           <View>
             <Text style={styles.cardTitle}>
               PERGUNTA DO DIA
@@ -247,12 +247,12 @@ export default class QuestionCard extends React.Component {
               RESPONDER!
             </Button>
           </View>
-        </Card.Content>
+        </View>
       );
       break;
       case 2:
       return (
-        <Card.Content style={styles.cardContent}>
+        <View style={styles.cardContent}>
           <View>
             <Text style={styles.cardTitle}>
               PERGUNTA DO DIA
@@ -301,12 +301,12 @@ export default class QuestionCard extends React.Component {
               {this.state.dailyQuestion.optionD}
             </Button>
           </View>
-        </Card.Content>
+        </View>
       );
       break;
       case 3:
       return (
-        <Card.Content style={styles.cardContent}>
+        <View style={styles.cardContent}>
           <View>
             <Text style={styles.cardTitle}>
               PERGUNTA DO DIA
@@ -325,12 +325,12 @@ export default class QuestionCard extends React.Component {
           </View>
           <View>
           </View>
-        </Card.Content>
+        </View>
       );
       break;
       case 4:
       return (
-        <Card.Content style={styles.cardContent}>
+        <View style={styles.cardContent}>
           <View>
             <Text style={styles.cardTitle}>
               PERGUNTA DO DIA
@@ -349,12 +349,12 @@ export default class QuestionCard extends React.Component {
           </View>
           <View>
           </View>
-        </Card.Content>
+        </View>
       );
       break;
       case 5:
       return (
-        <Card.Content style={styles.cardContent}>
+        <View style={styles.cardContent}>
           <View>
             <Text style={styles.cardTitle}>
               PERGUNTA DO DIA
@@ -370,7 +370,7 @@ export default class QuestionCard extends React.Component {
           </View>
           <View>
           </View>
-        </Card.Content>
+        </View>
       );
       break;
       default:
@@ -399,9 +399,9 @@ export default class QuestionCard extends React.Component {
 
   render() {
     return (
-      <Card style={styles.card}>
+      <View style={styles.card}>
         {this.loadQuestionCard()}
-      </Card>
+      </View>
     );
   }
 }
@@ -410,6 +410,8 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     margin: 4,
+    borderRadius: 16,
+    backgroundColor: '#fdfdfd',
   },
   cardContent: {
     flex: 1,
@@ -419,7 +421,6 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 22,
-    // fontWeight: '500',
     fontFamily: 'montserrat-bold'
   },
   cardParagraph: {

@@ -23,6 +23,7 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.pictaguatinga.sozoapp",
       "supportsTablet": true
     },
     "android": {

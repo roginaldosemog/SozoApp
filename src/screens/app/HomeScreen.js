@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, StatusBar } from 'react-native';
+import { View, StyleSheet, StatusBar, Text } from 'react-native';
+import { LinearGradient } from 'expo';
 import * as firebase from 'firebase';
 import QuestionCard from '../../components/QuestionCard';
 
@@ -13,7 +14,9 @@ export default class HomeScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <QuestionCard />
+        <View style={{flex: 1}}>
+          <QuestionCard />
+        </View>
       </View>
     );
   }
@@ -22,8 +25,7 @@ export default class HomeScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: (StatusBar.currentHeight + 4),
-    padding: 4,
-    backgroundColor: '#ddd'
+    paddingTop: StatusBar.currentHeight,
+    backgroundColor: '#bb1111'
   },
 });
