@@ -5,6 +5,7 @@ import CountDown from 'react-native-countdown-component';
 import * as firebase from 'firebase';
 import moment from 'moment';
 
+import { MontText, MontBoldText, MontSemiboldText } from './StyledText';
 import PlanDates from '../constants/PlanDates';
 
 export default class QuestionCard extends React.Component {
@@ -226,17 +227,17 @@ export default class QuestionCard extends React.Component {
       return (
         <View style={styles.cardContent}>
           <View>
-            <Text style={styles.cardTitle}>
+            <MontBoldText style={styles.cardTitle}>
               PERGUNTA DO DIA
-            </Text>
-            <Text style={styles.cardTitle}>
+            </MontBoldText>
+            <MontBoldText style={styles.cardTitle}>
               {this.state.actualPlanChapter}
-            </Text>
+            </MontBoldText>
           </View>
           <View>
-            <Text style={styles.cardParagraph}>
+            <MontSemiboldText style={styles.cardParagraph}>
               Não respondida.
-            </Text>
+            </MontSemiboldText>
           </View>
           <View>
             <Button
@@ -254,12 +255,12 @@ export default class QuestionCard extends React.Component {
       return (
         <View style={styles.cardContent}>
           <View>
-            <Text style={styles.cardTitle}>
+            <MontBoldText style={styles.cardTitle}>
               PERGUNTA DO DIA
-            </Text>
-            <Text style={styles.cardTitle}>
+            </MontBoldText>
+            <MontBoldText style={styles.cardTitle}>
               {this.state.actualPlanChapter}
-            </Text>
+            </MontBoldText>
             <CountDown
               until={10}
               size={15}
@@ -271,9 +272,9 @@ export default class QuestionCard extends React.Component {
             />
           </View>
           <View>
-            <Text style={styles.cardParagraph}>
+            <MontSemiboldText style={styles.cardParagraph}>
               {this.state.dailyQuestion.statement}
-            </Text>
+            </MontSemiboldText>
           </View>
           <View>
             <Button style={styles.cardButton}
@@ -308,20 +309,20 @@ export default class QuestionCard extends React.Component {
       return (
         <View style={styles.cardContent}>
           <View>
-            <Text style={styles.cardTitle}>
+            <MontBoldText style={styles.cardTitle}>
               PERGUNTA DO DIA
-            </Text>
-            <Text style={styles.cardTitle}>
+            </MontBoldText>
+            <MontBoldText style={styles.cardTitle}>
               {this.state.actualPlanChapter}
-            </Text>
+            </MontBoldText>
           </View>
           <View>
-            <Text style={styles.cardParagraph}>
+            <MontSemiboldText style={styles.cardParagraph}>
               Você acertou a pergunta de hoje :)
-            </Text>
-            <Text style={styles.cardParagraph}>
+            </MontSemiboldText>
+            <MontSemiboldText style={styles.cardParagraph}>
               Volte amanhã pra ganhar mais pontos!
-            </Text>
+            </MontSemiboldText>
           </View>
           <View>
           </View>
@@ -332,20 +333,20 @@ export default class QuestionCard extends React.Component {
       return (
         <View style={styles.cardContent}>
           <View>
-            <Text style={styles.cardTitle}>
+            <MontBoldText style={styles.cardTitle}>
               PERGUNTA DO DIA
-            </Text>
-            <Text style={styles.cardTitle}>
+            </MontBoldText>
+            <MontBoldText style={styles.cardTitle}>
               {this.state.actualPlanChapter}
-            </Text>
+            </MontBoldText>
           </View>
           <View>
-            <Text style={styles.cardParagraph}>
+            <MontSemiboldText style={styles.cardParagraph}>
               Você errou a pergunta de hoje :/
-            </Text>
-            <Text style={styles.cardParagraph}>
+            </MontSemiboldText>
+            <MontSemiboldText style={styles.cardParagraph}>
               Tente novamente amanhã, e não fique pra trás!
-            </Text>
+            </MontSemiboldText>
           </View>
           <View>
           </View>
@@ -356,17 +357,17 @@ export default class QuestionCard extends React.Component {
       return (
         <View style={styles.cardContent}>
           <View>
-            <Text style={styles.cardTitle}>
+            <MontBoldText style={styles.cardTitle}>
               PERGUNTA DO DIA
-            </Text>
-            <Text style={styles.cardTitle}>
+            </MontBoldText>
+            <MontBoldText style={styles.cardTitle}>
               {this.state.actualPlanChapter}
-            </Text>
+            </MontBoldText>
           </View>
           <View>
-            <Text style={styles.cardParagraph}>
+            <MontSemiboldText style={styles.cardParagraph}>
               Hoje não tem pergunta!
-            </Text>
+            </MontSemiboldText>
           </View>
           <View>
           </View>
@@ -411,6 +412,8 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 4,
     borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 6,
     backgroundColor: '#fdfdfd',
   },
   cardContent: {
@@ -420,11 +423,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   cardTitle: {
-    fontSize: 22,
-    fontFamily: 'montserrat-bold'
+    fontSize: 26,
   },
   cardParagraph: {
-    //
+    fontSize: 18,
   },
   cardButton: {
     marginTop: 10,
