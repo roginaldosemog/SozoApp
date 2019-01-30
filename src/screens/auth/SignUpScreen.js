@@ -1,8 +1,5 @@
 import React from 'react';
-// import { StyleSheet, View, Text } from 'react-native';
-// import { Card, Button, TextInput, HelperText } from 'react-native-paper';
-import { RadioButton, Paragraph } from 'react-native-paper';
-import { StyleSheet, View, Text, TextInput, Button, Alert } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, Alert, Picker } from 'react-native';
 import * as firebase from 'firebase';
 import moment from 'moment';
 
@@ -34,23 +31,14 @@ export default class SignUpScreen extends React.Component {
         <View style={{paddingTop:10}} />
 
         <Text>Qual a sua equipe?</Text>
-
-        <RadioButton.Group
-          value={this.state.team}
-          onValueChange={(team) => { this.setState({team: team}) }} >
-          <View style={styles.row}>
-            <Paragraph>Nenhuma</Paragraph>
-            <RadioButton value='none' />
-          </View>
-          <View style={styles.row}>
-            <Paragraph>BIC (Meninos)</Paragraph>
-            <RadioButton value='bic' />
-          </View>
-          <View style={styles.row}>
-            <Paragraph>JFG (Meninas)</Paragraph>
-            <RadioButton value='jfg' />
-          </View>
-        </RadioButton.Group>
+        <Picker
+          selectedValue={this.state.team}
+          style={{ height: 40, width: 200 }}
+          onValueChange={(team) => { this.setState({team: team}) }}>
+          <Picker.Item label="Sem equipe" value="none" />
+          <Picker.Item label="JFG" value="jfg" />
+          <Picker.Item label="BIC" value="bic" />
+        </Picker>
         <View style={{paddingTop:10}} />
 
         <TextInput style={{width: 200, height: 40, borderWidth: 1}}

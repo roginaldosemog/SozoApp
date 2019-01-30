@@ -1,6 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { Card, Button } from 'react-native-paper';
+import { ActivityIndicator, StyleSheet, Text, View, Button } from 'react-native';
 import CountDown from 'react-native-countdown-component';
 import * as firebase from 'firebase';
 import moment from 'moment';
@@ -241,12 +240,12 @@ export default class QuestionCard extends React.Component {
           </View>
           <View>
             <Button
+              title="RESPONDER!"
               style={styles.cardButton}
               mode="contained"
               color="#004488"
-              onPress={() => this.makeQuestion()}>
-              RESPONDER!
-            </Button>
+              onPress={() => this.makeQuestion()}
+            />
           </View>
         </View>
       );
@@ -277,30 +276,34 @@ export default class QuestionCard extends React.Component {
             </MontSemiboldText>
           </View>
           <View>
-            <Button style={styles.cardButton}
+            <Button
+              title={this.state.dailyQuestion.optionA}
+              style={styles.cardButton}
               mode="contained"
               color="#004488"
-              onPress={() => this.answerQuestion(1)}>
-              {this.state.dailyQuestion.optionA}
-            </Button>
-            <Button style={styles.cardButton}
+              onPress={() => this.answerQuestion(1)}
+            />
+            <Button
+              title={this.state.dailyQuestion.optionB}
+              style={styles.cardButton}
               mode="contained"
               color="#004488"
-              onPress={() => this.answerQuestion(2)}>
-              {this.state.dailyQuestion.optionB}
-            </Button>
-            <Button style={styles.cardButton}
+              onPress={() => this.answerQuestion(2)}
+            />
+            <Button
+              title={this.state.dailyQuestion.optionC}
+              style={styles.cardButton}
               mode="contained"
               color="#004488"
-              onPress={() => this.answerQuestion(3)}>
-              {this.state.dailyQuestion.optionC}
-            </Button>
-            <Button style={styles.cardButton}
+              onPress={() => this.answerQuestion(3)}
+            />
+            <Button
+              title={this.state.dailyQuestion.optionD}
+              style={styles.cardButton}
               mode="contained"
               color="#004488"
-              onPress={() => this.answerQuestion(4)}>
-              {this.state.dailyQuestion.optionD}
-            </Button>
+              onPress={() => this.answerQuestion(4)}
+            />
           </View>
         </View>
       );
@@ -369,8 +372,7 @@ export default class QuestionCard extends React.Component {
               Hoje não tem pergunta!
             </MontSemiboldText>
           </View>
-          <View>
-          </View>
+          <View></View>
         </View>
       );
       break;
@@ -410,10 +412,10 @@ export default class QuestionCard extends React.Component {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    margin: 4,
-    borderRadius: 16,
+    margin: 14,
+    borderRadius: 20,
     paddingVertical: 14,
-    paddingHorizontal: 6,
+    paddingHorizontal: 20,
     backgroundColor: '#fdfdfd',
   },
   cardContent: {
@@ -429,6 +431,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   cardButton: {
-    marginTop: 10,
+    padding: 8,
   },
 });

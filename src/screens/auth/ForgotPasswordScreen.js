@@ -1,6 +1,4 @@
 import React from 'react';
-// import { StyleSheet, View, Text } from 'react-native';
-// import { Card, Button, TextInput, HelperText } from 'react-native-paper';
 import { ActivityIndicator, AsyncStorage, StyleSheet, View, Text, TextInput, Button, Alert } from 'react-native';
 import * as firebase from 'firebase';
 
@@ -28,7 +26,7 @@ export default class ForgotPasswordScreen extends React.Component {
           autoCorrect={false}
           />
 
-        <Button title="Reset Password" onPress={this._resetPasswordAsync} />
+        <Button title="Reset Password" onPress={() => this._resetPassword} />
       </View>
     );
   }

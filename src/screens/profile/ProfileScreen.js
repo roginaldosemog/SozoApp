@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Text, View, StyleSheet } from 'react-native';
-import { Appbar } from 'react-native-paper';
 import { ExpoLinksView } from '@expo/samples';
 import * as firebase from 'firebase';
 
